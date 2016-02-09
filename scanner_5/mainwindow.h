@@ -16,8 +16,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    pcap_open_live();
-    pcap_close();
+//     pcap_open_live();
+//     pcap_close();
 
 private:
     pcap_t* handle;
@@ -27,6 +27,7 @@ private:
     struct iphdr* ip_h;
     struct tcphdr* tcp_h;
     struct udphdr* udp_h;
+
 
 
 private slots:

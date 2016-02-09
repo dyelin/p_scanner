@@ -36,6 +36,15 @@ void MainWindow::add_p(){
 
     char errbuf[PCAP_ERRBUF_SIZE];
     char dev[] = "eth0";
+
+    int res = pcap_next_ex(handle, &pkthdr, &data);
+    //if (res == 0) continue;
+
+    u_char* move;
+
+    move = (u_char *)data;
+    ether_h = (struct ether_header *)move;
+
     handle = pcap_open_live(dev, BUFSIZE, 1, 1000, errbuf);
 
         if(handle == NULL){
@@ -44,14 +53,16 @@ void MainWindow::add_p(){
            // return(2);
         }
 
-    int a=1;
+//    int a=1;
     QTreeWidgetItem* list = new QTreeWidgetItem(ui->treeWidget);
-    list->setText(0, QString("%1").arg(a));
+//    list->setText(0, QString("%1").arg(a));
 
     if(ether_h->ether_type == ntohs(ETHERTYPE_IP)){
 
         list->setText(2, QString("%1").arg("IPv4"));
 
+        move += sizeof(struct ether_header);
+        ip_h = (struct iphdr *)move;
 
         struct in_addr s_addr = *((struct in_addr*)&(ip_h->saddr));
         struct in_addr d_addr = *((struct in_addr*)&(ip_h->daddr));
@@ -62,11 +73,13 @@ void MainWindow::add_p(){
 
         if(ip_h->protocol == IPPROTO_TCP){
 
+            tcp_h =(struct tcphdr *)((char*)ip_h + (ip_h->ihl*4));
             IP_P->setText(5, QString("%1").arg("TCP"));
 
         }
         else if(ip_h->protocol == IPPROTO_UDP){
 
+            udp_h =(struct udphdr *)((char*)ip_h + (ip_h->ihl*4));
             IP_P->setText(5, QString("%1").arg("UDP"));
 
         }
